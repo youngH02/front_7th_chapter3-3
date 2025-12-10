@@ -1,4 +1,4 @@
-import { useAddPost } from "../model/useAddPost"
+import { useAddPost } from "../../post/model/useAddPost"
 import { Button, Input } from "@/shared/ui"
 import { Textarea } from "@/shared/ui/Card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/Dialog"
