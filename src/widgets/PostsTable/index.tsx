@@ -4,22 +4,27 @@ import { Edit2, MessageSquare, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react
 import { type FC } from "react"
 import { TPost } from "@/entities/posts/model/types"
 import TagBadge from "@/widgets/PostsTable/TagBadge"
-import { useDeletePost } from "@/features/post/model/useDeletePost"
-import { useEditPost } from "@/features/post/model/useEditPost"
-import { usePostDetail } from "@/features/post/model/usePostDetail"
 import { useSearchFilter } from "@/features/search/model/useSearchFilter"
 import { highlightText } from "@/shared/lib/highlightText"
+import { useDialogStore } from "@/shared/store/dialogStore"
+import { postApi } from "@/entities/posts/api/postApi"
 
 interface IProps {
   posts: TPost[]
+  onRemovePost: (postId: number) => void
 }
 
-const PostsTable: FC<IProps> = ({ posts }) => {
+const PostsTable: FC<IProps> = ({ posts, onRemovePost }) => {
   const { searchQuery, selectedTag, setSelectedTag } = useSearchFilter()
+  const { openDetailDialog, openEditDialog } = useDialogStore()
 
-  const { handleDelete: deletePost } = useDeletePost()
-  const { openEditDialog } = useEditPost()
-  const { openPostDetail } = usePostDetail()
+  // 삭제 핸들러
+  const handleDelete = async (postId: number) => {
+    if (confirm("정말 삭제하시겠습니까?")) {
+      await postApi.deletePost(postId)
+      onRemovePost(postId) // 로컬 상태에서 제거
+    }
+  }
 
   // 유저 클릭 핸들러 (TODO: useUserModal hook 필요시 분리)
   const handleUserClick = (author: TPost["author"]) => {
@@ -73,13 +78,13 @@ const PostsTable: FC<IProps> = ({ posts }) => {
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
+                <Button variant="ghost" size="sm" onClick={() => openDetailDialog(post)}>
                   <MessageSquare className="w-4 h-4" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => openEditDialog(post)}>
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>
+                <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>

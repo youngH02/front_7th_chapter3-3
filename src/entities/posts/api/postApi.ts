@@ -16,7 +16,7 @@ export const postApi = {
 
   searchPosts: (query: string) => apiClient.get<{ posts: TPost[]; total: number }>(`/posts/search?q=${query}`),
 
-  getTags: () => apiClient.get<string[]>("/posts/tags"),
+  getTags: () => apiClient.get<{ slug: string; name: string; url: string }[]>("/posts/tags"),
 
   // 생성/수정/삭제
   createPost: (data: Omit<TPost, "id">) => apiClient.post<TPost>("/posts/add", data),

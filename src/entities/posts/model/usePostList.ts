@@ -22,9 +22,15 @@ export const usePostList = (limit: number, skip: number, tag?: string) => {
     }
   }
 
+  // 로컬 상태에서 게시물 제거 (Optimistic Update)
+  const removePost = (postId: number) => {
+    setPosts((prev) => prev.filter((post) => post.id !== postId))
+    setTotal((prev) => prev - 1)
+  }
+
   useEffect(() => {
     fetchPosts()
   }, [limit, skip, tag])
 
-  return { posts, total, loading, refetch: fetchPosts }
+  return { posts, total, loading, refetch: fetchPosts, removePost }
 }

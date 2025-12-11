@@ -48,8 +48,8 @@ const SearchFilter: FC = () => {
         <SelectContent>
           <SelectItem value="all">모든 태그</SelectItem>
           {tags.map((tag) => (
-            <SelectItem key={tag} value={tag}>
-              {tag}
+            <SelectItem key={tag.slug} value={tag.slug}>
+              {tag.name}
             </SelectItem>
           ))}
         </SelectContent>

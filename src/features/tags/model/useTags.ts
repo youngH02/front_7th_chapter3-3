@@ -1,8 +1,14 @@
 import { postApi } from "@/entities/posts/api/postApi"
 import { useEffect, useState } from "react"
 
+export type TTag = {
+  slug: string
+  name: string
+  url: string
+}
+
 export const useTags = () => {
-  const [tags, setTags] = useState<string[]>([])
+  const [tags, setTags] = useState<TTag[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchTags = async () => {
