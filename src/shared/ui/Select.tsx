@@ -1,5 +1,5 @@
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { forwardRef } from "react"
+import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react"
 import { Check, ChevronDown } from "lucide-react"
 
 // 선택 컴포넌트
@@ -7,7 +7,10 @@ export const Select = SelectPrimitive.Root
 export const SelectGroup = SelectPrimitive.Group
 export const SelectValue = SelectPrimitive.Value
 
-export const SelectTrigger = forwardRef(({ className, children, ...props }, ref) => (
+export const SelectTrigger = forwardRef<
+  ElementRef<typeof SelectPrimitive.Trigger>,
+  ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={`flex h-10 items-center justify-between rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
@@ -19,7 +22,10 @@ export const SelectTrigger = forwardRef(({ className, children, ...props }, ref)
 ))
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
-export const SelectContent = forwardRef(({ className, children, position = "popper", ...props }, ref) => (
+export const SelectContent = forwardRef<
+  ElementRef<typeof SelectPrimitive.Content>,
+  ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
@@ -33,7 +39,10 @@ export const SelectContent = forwardRef(({ className, children, position = "popp
 ))
 SelectContent.displayName = SelectPrimitive.Content.displayName
 
-export const SelectItem = forwardRef(({ className, children, ...props }, ref) => (
+export const SelectItem = forwardRef<
+  ElementRef<typeof SelectPrimitive.Item>,
+  ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${className}`}

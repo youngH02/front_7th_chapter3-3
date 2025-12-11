@@ -1,6 +1,7 @@
+import { TPost } from "@/entities/posts/model/types"
 
 interface Props {
-  post: Post
+  post: TPost
 }
 
 export const PostCard = ({ post }: Props) => (

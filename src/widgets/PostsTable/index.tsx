@@ -8,6 +8,7 @@ import { useDeletePost } from "@/features/post/model/useDeletePost"
 import { useEditPost } from "@/features/post/model/useEditPost"
 import { usePostDetail } from "@/features/post/model/usePostDetail"
 import { useSearchFilter } from "@/features/search/model/useSearchFilter"
+import { highlightText } from "@/shared/lib/highlightText"
 
 interface IProps {
   posts: TPost[]
@@ -19,22 +20,6 @@ const PostsTable: FC<IProps> = ({ posts }) => {
   const { handleDelete: deletePost } = useDeletePost()
   const { openEditDialog } = useEditPost()
   const { openPostDetail } = usePostDetail()
-
-  // 하이라이트 함수
-  const highlightText = (text: string, query: string) => {
-    if (!query.trim()) return text
-    const regex = new RegExp(`(${query})`, "gi")
-    const parts = text.split(regex)
-    return parts.map((part, i) =>
-      regex.test(part) ? (
-        <mark key={i} className="bg-yellow-200">
-          {part}
-        </mark>
-      ) : (
-        part
-      ),
-    )
-  }
 
   // 유저 클릭 핸들러 (TODO: useUserModal hook 필요시 분리)
   const handleUserClick = (author: TPost["author"]) => {
