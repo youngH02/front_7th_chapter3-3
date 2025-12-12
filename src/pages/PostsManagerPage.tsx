@@ -9,8 +9,8 @@ import { usePostList } from "@/entities/posts/model/usePostList"
 import { useSearchFilter } from "@/features/search/model/useSearchFilter"
 
 const PostsManager = () => {
-  const { selectedTag, limit, skip } = useSearchFilter()
-  const { posts, total, loading, removePost } = usePostList(limit, skip, selectedTag)
+  const { selectedTag, limit, skip, searchQuery } = useSearchFilter()
+  const { posts, total, loading, removePost } = usePostList(limit, skip, selectedTag, searchQuery)
 
   return (
     <Card className="w-full max-w-6xl mx-auto">

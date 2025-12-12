@@ -1,26 +1,32 @@
 import { postApi } from "@/entities/posts/api/postApi"
-import { useState } from "react"
+import { TPost } from "@/entities/posts/model/types"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export const useDeletePost = () => {
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return false
-
-    setIsLoading(true)
-    try {
-      await postApi.deletePost(id)
-      return true
-    } catch (error) {
-      console.error("게시물 삭제 오류:", error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const mutation = useMutation({
+    mutationFn: (id: number) => {
+      if (!confirm("정말 삭제하시겠습니까?")) {
+        return Promise.reject(new Error("User cancelled"))
+      }
+      return postApi.deletePost(id)
+    },
+    onSuccess: (_data, deletedId) => {
+      // 모든 posts 캐시에서 삭제된 게시물 제거 (낙관적 업데이트)
+      queryClient.setQueriesData<{ posts: TPost[]; total: number }>({ queryKey: queryKeys.posts.all }, (old) => {
+        if (!old) return old
+        return {
+          posts: old.posts.filter((p) => p.id !== deletedId),
+          total: old.total - 1,
+        }
+      })
+    },
+  })
 
   return {
-    handleDelete,
-    isLoading,
+    handleDelete: mutation.mutate,
+    isLoading: mutation.isPending,
   }
 }

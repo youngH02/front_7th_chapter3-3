@@ -1,5 +1,6 @@
 import { postApi } from "@/entities/posts/api/postApi"
-import { useEffect, useState } from "react"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useQuery } from "@tanstack/react-query"
 
 export type TTag = {
   slug: string
@@ -8,24 +9,14 @@ export type TTag = {
 }
 
 export const useTags = () => {
-  const [tags, setTags] = useState<TTag[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.tags.all,
+    queryFn: postApi.getTags,
+    staleTime: 1000 * 60 * 10, // 태그는 10분간 fresh
+  })
 
-  const fetchTags = async () => {
-    setLoading(true)
-    try {
-      const data = await postApi.getTags()
-      setTags(data)
-    } catch (error) {
-      console.error("태그 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
+  return {
+    tags: data ?? [],
+    loading: isLoading,
   }
-
-  useEffect(() => {
-    fetchTags()
-  }, [])
-
-  return { tags, loading }
 }

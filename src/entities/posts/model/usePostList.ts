@@ -1,36 +1,45 @@
 import { postApi } from "@/entities/posts/api/postApi"
 import { TPost } from "@/entities/posts/model/types"
-import { useEffect, useState } from "react"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-export const usePostList = (limit: number, skip: number, tag?: string) => {
-  const [posts, setPosts] = useState<TPost[]>([])
-  const [loading, setLoading] = useState(false)
-  const [total, setTotal] = useState(0)
+export const usePostList = (limit: number, skip: number, tag?: string, searchQuery?: string) => {
+  const queryClient = useQueryClient()
 
-  const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      // 태그가 있으면 태그별, 없으면 전체
-      const data = tag && tag !== "all" ? await postApi.getPostsByTag(tag) : await postApi.getPosts(limit, skip)
-      setPosts(data.posts)
-      setTotal(data.total)
-    } catch (error) {
-      const errorMessage = tag ? "태그별 게시물 가져오기 오류:" : "게시물 가져오기 오류:"
-      console.error(errorMessage, error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [...queryKeys.posts.list({ limit, skip, tag }), searchQuery],
+    queryFn: async () => {
+      // 검색어가 있으면 검색 API 사용
+      if (searchQuery?.trim()) {
+        return postApi.searchPosts(searchQuery)
+      }
+      // 태그가 있으면 태그별 조회
+      if (tag && tag !== "all") {
+        return postApi.getPostsByTag(tag)
+      }
+      // 기본 페이지네이션 조회
+      return postApi.getPosts(limit, skip)
+    },
+  })
 
-  // 로컬 상태에서 게시물 제거 (Optimistic Update)
+  // 낙관적 삭제 (캐시에서 즉시 제거)
   const removePost = (postId: number) => {
-    setPosts((prev) => prev.filter((post) => post.id !== postId))
-    setTotal((prev) => prev - 1)
+    queryClient.setQueryData(
+      [...queryKeys.posts.list({ limit, skip, tag }), searchQuery],
+      (old: { posts: TPost[]; total: number } | undefined) =>
+        old && {
+          ...old,
+          posts: old.posts.filter((p) => p.id !== postId),
+          total: old.total - 1,
+        },
+    )
   }
 
-  useEffect(() => {
-    fetchPosts()
-  }, [limit, skip, tag])
-
-  return { posts, total, loading, refetch: fetchPosts, removePost }
+  return {
+    posts: data?.posts ?? [],
+    total: data?.total ?? 0,
+    loading: isLoading,
+    refetch,
+    removePost,
+  }
 }

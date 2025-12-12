@@ -3,20 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/Di
 import { Button, Input } from "@/shared/ui"
 import { Textarea } from "@/shared/ui/Card"
 import { useDialogStore } from "@/shared/store/dialogStore"
-import { postApi } from "@/entities/posts/api/postApi"
-import { usePostList } from "@/entities/posts/model/usePostList"
-import { useSearchFilter } from "@/features/search/model/useSearchFilter"
+import { useEditPost } from "@/features/post/model/useEditPost"
 
 const EditPostDialog: FC = () => {
   const { showEditDialog, editingPost, closeEditDialog, setEditingPost } = useDialogStore()
-  const { selectedTag, limit, skip } = useSearchFilter()
-  const { refetch } = usePostList(limit, skip, selectedTag)
+  const { handleSubmit, isLoading } = useEditPost()
 
   const handleUpdatePost = async () => {
     if (editingPost) {
-      await postApi.updatePost(editingPost.id, editingPost)
+      await handleSubmit()
       closeEditDialog()
-      refetch()
     }
   }
 
@@ -40,7 +36,9 @@ const EditPostDialog: FC = () => {
             value={editingPost.body || ""}
             onChange={(e) => setEditingPost({ ...editingPost, body: e.target.value })}
           />
-          <Button onClick={handleUpdatePost}>게시물 업데이트</Button>
+          <Button onClick={handleUpdatePost} disabled={isLoading}>
+            {isLoading ? "업데이트 중..." : "게시물 업데이트"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

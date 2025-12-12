@@ -57,14 +57,12 @@ export const useSearchFilter = () => {
   }
 
   return {
-    // 값들
     searchQuery,
     selectedTag,
     sortBy,
     sortOrder,
     limit,
     skip,
-    // setter들
     setSearchQuery,
     setSelectedTag,
     setSortBy,

@@ -1,41 +1,33 @@
 import { postApi } from "@/entities/posts/api/postApi"
 import { TPost } from "@/entities/posts/model/types"
-import { useState } from "react"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useDialogStore } from "@/shared/store/dialogStore"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export const useEditPost = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedPost, setSelectedPost] = useState<TPost | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
+  const { editingPost } = useDialogStore()
 
-  const openEditDialog = (post: TPost) => {
-    setSelectedPost(post)
-    setIsOpen(true)
-  }
-
-  const handleSubmit = async () => {
-    if (!selectedPost) return
-
-    setIsLoading(true)
-    try {
-      const data = await postApi.updatePost(selectedPost.id, selectedPost)
-      setIsOpen(false)
-      setSelectedPost(null)
-      return data
-    } catch (error) {
-      console.error("게시물 업데이트 오류:", error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const mutation = useMutation({
+    mutationFn: () => {
+      if (!editingPost) return Promise.reject(new Error("No post selected"))
+      return postApi.updatePost(editingPost.id, editingPost)
+    },
+    onSuccess: () => {
+      if (!editingPost) return
+      // 모든 posts 캐시에서 수정된 게시물 업데이트 (낙관적 업데이트)
+      queryClient.setQueriesData<{ posts: TPost[]; total: number }>({ queryKey: queryKeys.posts.all }, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          posts: old.posts.map((p) => (p.id === editingPost.id ? { ...p, ...editingPost } : p)),
+        }
+      })
+    },
+  })
 
   return {
-    isOpen,
-    setIsOpen,
-    selectedPost,
-    setSelectedPost,
-    openEditDialog,
-    handleSubmit,
-    isLoading,
+    handleSubmit: () => mutation.mutateAsync(),
+    isLoading: mutation.isPending,
   }
 }

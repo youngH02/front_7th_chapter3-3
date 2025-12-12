@@ -1,28 +1,17 @@
 import { commentApi } from "@/entities/comments/api/commentApi"
-import { TComment } from "@/entities/comments/model/types"
-import { useEffect, useState } from "react"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useQuery } from "@tanstack/react-query"
 
 export const useCommentList = (postId: number) => {
-  const [comments, setComments] = useState<TComment[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: queryKeys.comments.byPost(postId),
+    queryFn: () => commentApi.getCommentsByPostId(postId),
+    enabled: !!postId,
+  })
 
-  const fetchComments = async () => {
-    if (!postId) return
-
-    setLoading(true)
-    try {
-      const data = await commentApi.getCommentsByPostId(postId)
-      setComments(data.comments)
-    } catch (error) {
-      console.error("댓글 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
+  return {
+    comments: data?.comments ?? [],
+    loading: isLoading,
+    refetch,
   }
-
-  useEffect(() => {
-    fetchComments()
-  }, [postId])
-
-  return { comments, loading, refetch: fetchComments }
 }

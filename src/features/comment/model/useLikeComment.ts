@@ -1,24 +1,39 @@
 import { commentApi } from "@/entities/comments/api/commentApi"
-import { useState } from "react"
+import { TComment } from "@/entities/comments/model/types"
+import { queryKeys } from "@/shared/lib/queryKeys"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-export const useLikeComment = () => {
-  const [isLoading, setIsLoading] = useState(false)
+export const useLikeComment = (postId: number) => {
+  const queryClient = useQueryClient()
 
-  const handleLike = async (id: number, currentLikes: number) => {
-    setIsLoading(true)
-    try {
-      const data = await commentApi.likeComment(id, currentLikes)
-      return data
-    } catch (error) {
-      console.error("댓글 좋아요 오류:", error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const mutation = useMutation({
+    mutationFn: ({ id, currentLikes }: { id: number; currentLikes: number }) =>
+      commentApi.likeComment(id, currentLikes),
+    // 낙관적 업데이트
+    onMutate: async ({ id, currentLikes }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.comments.byPost(postId) })
+
+      const previousComments = queryClient.getQueryData<{ comments: TComment[] }>(queryKeys.comments.byPost(postId))
+
+      queryClient.setQueryData(queryKeys.comments.byPost(postId), (old: { comments: TComment[] } | undefined) =>
+        old
+          ? {
+              comments: old.comments.map((c) => (c.id === id ? { ...c, likes: currentLikes + 1 } : c)),
+            }
+          : old,
+      )
+
+      return { previousComments }
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousComments) {
+        queryClient.setQueryData(queryKeys.comments.byPost(postId), context.previousComments)
+      }
+    },
+  })
 
   return {
-    handleLike,
-    isLoading,
+    handleLike: (id: number, currentLikes: number) => mutation.mutate({ id, currentLikes }),
+    isLoading: mutation.isPending,
   }
 }
