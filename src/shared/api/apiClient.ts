@@ -1,4 +1,5 @@
-const BASE_URL = "/api"
+// 개발 환경에서는 프록시 사용, 프로덕션에서는 직접 DummyJSON URL 사용
+const BASE_URL = import.meta.env.DEV ? "/api" : "https://dummyjson.com"
 
 export const apiClient = {
   get: async <T>(endpoint: string): Promise<T> => {
