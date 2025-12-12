@@ -159,28 +159,28 @@ https://youngh02.github.io/front_7th_chapter3-3/
 src/
 ├── shared/
 │   ├── ui/
-│   │   ├── Button.tsx        ← 1️⃣ 버튼 UI
-│   │   ├── Dialog.tsx        ← 2️⃣ 다이얼로그 UI
-│   │   ├── Input.tsx         ← 3️⃣ 입력 UI
-│   │   └── Card.tsx          ← 4️⃣ Textarea 포함
+│   │   ├── Button.tsx        ←  버튼 UI
+│   │   ├── Dialog.tsx        ←  다이얼로그 UI
+│   │   ├── Input.tsx         ←  입력 UI
+│   │   └── Card.tsx          ←  Textarea 포함
 │   ├── api/
-│   │   └── apiClient.ts      ← 5️⃣ fetch 래퍼
+│   │   └── apiClient.ts      ←  fetch 래퍼
 │   └── store/
-│       └── dialogStore.ts    ← 6️⃣ 다이얼로그 상태 관리
+│       └── dialogStore.ts    ←  다이얼로그 상태 관리
 │
 ├── entities/
 │   └── posts/
 │       ├── model/
-│       │   └── types.ts      ← 7️⃣ Post 타입 정의
+│       │   └── types.ts      ←  Post 타입 정의
 │       └── api/
-│           └── postApi.ts    ← 8️⃣ createPost API 함수
+│           └── postApi.ts    ←  createPost API 함수
 │
 ├── widgets/
 │   └── AddPostDialog/
-│       └── index.tsx         ← 9️⃣ 게시물 추가 위젯
+│       └── index.tsx         ←  게시물 추가 위젯
 │
 └── pages/
-    └── PostsManagerPage.tsx  ← 🔟 AddPostDialog 사용
+    └── PostsManagerPage.tsx  ←  AddPostDialog 사용
 ```
 
 | 레이어       | 개수 | 역할                  |
